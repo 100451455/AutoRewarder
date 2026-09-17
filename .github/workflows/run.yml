@@ -25,11 +25,18 @@ jobs:
     - name: Instalar Microsoft Edge en la máquina virtual
       run: |
         sudo apt-get update
-        sudo apt-get install -y software-properties-common apt-transport-https wget
-        wget -q https://microsoft.com -O- | sudo apt-key add -
-        sudo add-apt-repository "deb [arch=amd64] https://microsoft.com stable main"
+        sudo apt-get install -y software-properties-common apt-transport-https wget curl
+        
+        # 1. Descargar la clave oficial e instalarla en el llavero moderno de Ubuntu
+        sudo curl -fSsL https://microsoft.com | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
+        
+        # 2. Agregar el repositorio apuntando al llavero de seguridad creado
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://microsoft.com stable main" | sudo tee /etc/apt/sources.list.p/microsoft-edge.list
+        
+        # 3. Actualizar los índices e instalar Edge de forma limpia
         sudo apt-get update
         sudo apt-get install -y microsoft-edge-stable
+
 
     - name: Configurar Python
       uses: actions/setup-python@v5
