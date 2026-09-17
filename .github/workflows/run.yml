@@ -39,5 +39,6 @@ jobs:
 
     - name: Ejecutar AutoRewarder
       run: |
-        # Usamos el Chrome integrado de GitHub Actions en modo headless
-        python AutoRewarder_CLI.py --headless --browser chrome
+        # Ejecuta el bot de forma nativa para que procese tus cuentas de accounts.json
+        # Configuramos --pc 30 y --mobile 20 para cubrir los límites diarios típicos (puedes ajustar los números)
+        python AutoRewarder_CLI.py --pc 20 --mobile 0
