@@ -2,7 +2,7 @@ name: AutoRewarder Diario Multicuenta con VPN
 
 on:
   schedule:
-    # Se ejecuta todos los días a las 05:00 AM UTC (Aprox. 06:00 AM o 07:00 AM en España)
+    # Programado para ejecutarse a las 05:00 AM UTC (Equivale a primera hora de la mañana en España)
     - cron: '0 5 * * *'
   workflow_dispatch: # Botón para activarlo manualmente
 
@@ -31,14 +31,22 @@ jobs:
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Crear archivo de cuentas seguro
+    - name: Crear estructura de carpetas de AutoRewarder e inyectar cuentas
       env:
         CUENTAS_SECRET: ${{ secrets.CUENTAS_JSON }}
       run: |
-        echo "$CUENTAS_SECRET" > accounts.json
+        # Creamos la ruta oficial de datos del bot en Linux según su documentación
+        mkdir -p ~/.local/share/AutoRewarder
+        
+        # Guardamos el archivo de configuración indexado en su sitio correcto
+        echo "$CUENTAS_SECRET" > ~/.local/share/AutoRewarder/accounts.json
 
-    - name: Ejecutar AutoRewarder
+    - name: Ejecutar AutoRewarder en cadena
       run: |
-        # Ejecuta el bot de forma nativa para que procese tus cuentas de accounts.json
-        # Configuramos --pc 30 y --mobile 20 para cubrir los límites diarios típicos (puedes ajustar los números)
-        python AutoRewarder_CLI.py --pc 20 --mobile 0
+        # Ejecutamos las cuentas llamándolas por su 'label' o 'id' tal y como requiere el CLI del bot
+        echo "Lanzando automatización para Cuenta Principal..."
+        python AutoRewarder_CLI.py --account "Principal" --pc 20 --mobile 0
+        
+        # Si tienes una segunda cuenta en el JSON, descomenta las dos líneas de abajo eliminando el '#'
+        # echo "Lanzando automatización para Cuenta Secundaria..."
+        # python AutoRewarder_CLI.py --account "Secundaria" --pc 20 --mobile 0
