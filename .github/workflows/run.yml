@@ -1,0 +1,43 @@
+name: AutoRewarder Diario con VPN Doméstica
+
+on:
+  schedule:
+    # Se ejecuta automáticamente todos los días a las 06:00 AM UTC (Ajusta la hora a tu gusto)
+    - cron: '0 10 * * *'
+  workflow_dispatch: # Te permite activar el bot manualmente cuando quieras desde GitHub
+
+jobs:
+  run-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Clonar el repositorio
+      uses: actions/checkout@v4
+
+    - name: Conectar a tu VPN Doméstica (Tailscale)
+      uses: tailscale/github-action@v2
+      with:
+        authkey: ${{ secrets::TAILSCALE_AUTHKEY }}
+        # Obliga a toda la máquina virtual a salir por tu PC de casa
+        args: --exit-node=pc-grande
+
+    - name: Configurar Python
+      uses: actions/setup-python@v5
+      with:
+        python-cache-dependency-path: '**/requirements.txt'
+        python-version: '3.10'
+
+    - name: Instalar dependencias
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: Instalar Navegador Chrome para Selenium
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y google-chrome-stable
+
+    - name: Ejecutar AutoRewarder
+      run: |
+        # Reemplaza con tus flags o comandos específicos del bot
+        python AutoRewarder_CLI.py --headless
