@@ -18,8 +18,8 @@ jobs:
       uses: tailscale/github-action@v2
       with:
         authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-        # Añadimos --accept-routes para enlazar correctamente el tráfico con tu PC
-        args: --exit-node=pc-grande --accept-routes=true
+        # Reemplaza 100.x.x.x por la IP real de tu pc-grande
+        args: --exit-node=100.81.154.99 --accept-routes
 
 
     - name: Instalar Microsoft Edge en la máquina virtual
