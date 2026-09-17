@@ -27,15 +27,16 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y software-properties-common apt-transport-https wget curl
         
-        # 1. Descargar la clave oficial e instalarla en el llavero moderno de Ubuntu
-        sudo curl -fSsL https://microsoft.com | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
+        # 1. Descargar la clave desde el servidor de paquetes oficial (packages.microsoft.com)
+        curl -fSsL https://microsoft.com | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
         
-        # 2. Agregar el repositorio apuntando al llavero de seguridad creado
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://microsoft.com stable main" | sudo tee /etc/apt/sources.list.p/microsoft-edge.list
+        # 2. Agregar el repositorio en la ruta correcta (.list.d/) apuntando al servidor de repositorios de Edge
+        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://microsoft.com stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
         
-        # 3. Actualizar los índices e instalar Edge de forma limpia
+        # 3. Actualizar e instalar Edge
         sudo apt-get update
         sudo apt-get install -y microsoft-edge-stable
+
 
 
     - name: Configurar Python
