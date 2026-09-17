@@ -1,9 +1,9 @@
-name: AutoRewarder Diario Multicuenta con Edge
+name: AutoRewarder Diario Multicuenta con VPN
 
 on:
   schedule:
-    # Se ejecuta todos los días a las 06:00 AM UTC
-    - cron: '0 10 * * *'
+    # Se ejecuta todos los días a las 05:00 AM UTC (Aprox. 06:00 AM o 07:00 AM en España)
+    - cron: '0 5 * * *'
   workflow_dispatch: # Botón para activarlo manualmente
 
 jobs:
@@ -18,26 +18,7 @@ jobs:
       uses: tailscale/github-action@v2
       with:
         authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-        # Reemplaza 100.x.x.x por la IP real de tu pc-grande
         args: --exit-node=100.81.154.99 --accept-routes
-
-
-    - name: Instalar Microsoft Edge en la máquina virtual
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y software-properties-common apt-transport-https wget curl
-        
-        # 1. Descargar la clave desde el servidor de paquetes oficial (packages.microsoft.com)
-        curl -fSsL https://microsoft.com | gpg --dearmor | sudo tee /usr/share/keyrings/microsoft-edge.gpg > /dev/null
-        
-        # 2. Agregar el repositorio en la ruta correcta (.list.d/) apuntando al servidor de repositorios de Edge
-        echo "deb [arch=amd64 signed-by=/usr/share/keyrings/microsoft-edge.gpg] https://microsoft.com stable main" | sudo tee /etc/apt/sources.list.d/microsoft-edge.list
-        
-        # 3. Actualizar e instalar Edge
-        sudo apt-get update
-        sudo apt-get install -y microsoft-edge-stable
-
-
 
     - name: Configurar Python
       uses: actions/setup-python@v5
@@ -54,11 +35,9 @@ jobs:
       env:
         CUENTAS_SECRET: ${{ secrets.CUENTAS_JSON }}
       run: |
-        # Esto genera el archivo accounts.json de forma temporal en la máquina virtual
         echo "$CUENTAS_SECRET" > accounts.json
 
-    - name: Ejecutar AutoRewarder en cadena
+    - name: Ejecutar AutoRewarder
       run: |
-        # Ejecuta el bot pasándole Edge como navegador predeterminado
-        # El script leerá automáticamente el archivo accounts.json que acabamos de crear
-        python AutoRewarder_CLI.py --headless --browser edge
+        # Usamos el Chrome integrado de GitHub Actions en modo headless
+        python AutoRewarder_CLI.py --headless --browser chrome
