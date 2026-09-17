@@ -18,7 +18,9 @@ jobs:
       uses: tailscale/github-action@v2
       with:
         authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
-        args: --exit-node=pc-grande # Reemplaza por tu PC real en Tailscale
+        # Añadimos --accept-routes para enlazar correctamente el tráfico con tu PC
+        args: --exit-node=pc-grande --accept-routes=true
+
 
     - name: Instalar Microsoft Edge en la máquina virtual
       run: |
