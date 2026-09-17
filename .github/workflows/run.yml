@@ -1,10 +1,10 @@
-name: AutoRewarder Diario con VPN Doméstica
+name: AutoRewarder Diario Multicuenta con Edge
 
 on:
   schedule:
-    # Se ejecuta automáticamente todos los días a las 06:00 AM UTC (Ajusta la hora a tu gusto)
+    # Se ejecuta todos los días a las 06:00 AM UTC
     - cron: '0 10 * * *'
-  workflow_dispatch: # Te permite activar el bot manualmente cuando quieras desde GitHub
+  workflow_dispatch: # Botón para activarlo manualmente
 
 jobs:
   run-bot:
@@ -17,9 +17,17 @@ jobs:
     - name: Conectar a tu VPN Doméstica (Tailscale)
       uses: tailscale/github-action@v2
       with:
-        authkey: ${{ secrets::TAILSCALE_AUTHKEY }}
-        # Obliga a toda la máquina virtual a salir por tu PC de casa
-        args: --exit-node=pc-grande
+        authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+        args: --exit-node=pc-grande # Reemplaza por tu PC real en Tailscale
+
+    - name: Instalar Microsoft Edge en la máquina virtual
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y software-properties-common apt-transport-https wget
+        wget -q https://microsoft.com -O- | sudo apt-key add -
+        sudo add-apt-repository "deb [arch=amd64] https://microsoft.com stable main"
+        sudo apt-get update
+        sudo apt-get install -y microsoft-edge-stable
 
     - name: Configurar Python
       uses: actions/setup-python@v5
@@ -27,17 +35,20 @@ jobs:
         python-cache-dependency-path: '**/requirements.txt'
         python-version: '3.10'
 
-    - name: Instalar dependencias
+    - name: Instalar dependencias del Bot
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Instalar Navegador Chrome para Selenium
+    - name: Crear archivo de cuentas seguro
+      env:
+        CUENTAS_SECRET: ${{ secrets.CUENTAS_JSON }}
       run: |
-        sudo apt-get update
-        sudo apt-get install -y google-chrome-stable
+        # Esto genera el archivo accounts.json de forma temporal en la máquina virtual
+        echo "$CUENTAS_SECRET" > accounts.json
 
-    - name: Ejecutar AutoRewarder
+    - name: Ejecutar AutoRewarder en cadena
       run: |
-        # Reemplaza con tus flags o comandos específicos del bot
-        python AutoRewarder_CLI.py --headless
+        # Ejecuta el bot pasándole Edge como navegador predeterminado
+        # El script leerá automáticamente el archivo accounts.json que acabamos de crear
+        python AutoRewarder_CLI.py --headless --browser edge
